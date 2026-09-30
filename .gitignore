@@ -1,0 +1,48 @@
+# Virtual environment
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables / secrets
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Model artefacts
+models/*.keras
+models/*.h5
+models/*.pt
+models/*.pth
+
+# MLflow
+mlruns/
+
+# Large/raw datasets
+data/raw/*
+!data/raw/.gitkeep
+
+# PySpark
+spark-warehouse/
+
+# Logs
+*.log
+
+# Deep-learning virtual environment
+.venv-dl/
+.venv-dl/
+
+# Generated processed datasets
+data/processed/*.csv

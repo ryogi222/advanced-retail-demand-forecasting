@@ -123,13 +123,37 @@ def train_random_forest():
     print(f"MAPE: {mape:.2f}%")
 
     comparison = pd.DataFrame({
-        "date": test["date"],
-        "actual": y_test,
-        "prediction": predictions
+        "date": test["date"].values,
+        "actual": y_test.values,
+        "random_forest_forecast": predictions
     })
 
+    comparison["absolute_error"] = np.abs(
+        comparison["actual"]
+        - comparison["random_forest_forecast"]
+    )
+
+    output_path = (
+        PROJECT_ROOT
+        / "data"
+        / "processed"
+        / "random_forest_ca1_forecast.csv"
+    )
+
+    comparison.to_csv(
+        output_path,
+        index=False
+    )
+
     print("\n--- SAMPLE FORECASTS ---")
-    print(comparison.head(10))
+    print(
+        comparison.head(10).round(2).to_string(
+            index=False
+        )
+    )
+
+    print("\nForecast saved:")
+    print(output_path)
 
     # Feature importance
     importance = pd.DataFrame({

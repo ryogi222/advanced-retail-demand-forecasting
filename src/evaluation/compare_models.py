@@ -14,6 +14,7 @@ PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 
 BASELINE_FILE = PROCESSED_DIR / "hierarchical_forecasts.csv"
 TCN_FILE = PROCESSED_DIR / "temporal_cnn_ca1_forecast.csv"
+TRANSFORMER_FILE = PROCESSED_DIR / "transformer_ca1_forecast.csv"
 GRU_FILE = PROCESSED_DIR / "gru_ca1_forecast.csv"
 LSTM_FILE = PROCESSED_DIR / "lstm_ca1_forecast.csv"
 RF_FILE = PROCESSED_DIR / "random_forest_ca1_forecast.csv"
@@ -108,6 +109,14 @@ def compare_models():
     tcn = tcn.sort_values(
         "date"
     ).reset_index(drop=True)
+    transformer = pd.read_csv(
+        TRANSFORMER_FILE,
+        parse_dates=["date"]
+    )
+
+    transformer = transformer.sort_values(
+        "date"
+    ).reset_index(drop=True)
     # Keep only store-level CA_1 baseline
     baseline = baseline[
         (baseline["level"] == "store")
@@ -131,6 +140,7 @@ def compare_models():
     print(f"LSTM rows:     {len(lstm)}")
     print(f"Random Forest rows: {len(rf)}")
     print(f"Temporal CNN rows: {len(tcn)}")
+    print(f"Transformer rows: {len(transformer)}")
 
     # -------------------------------------------------
     # Validate lengths
@@ -144,6 +154,7 @@ def compare_models():
         == len(lstm)
         == len(rf)
         == len(tcn)
+        == len(transformer)
         == expected_rows
     ):
         raise ValueError(
@@ -172,6 +183,10 @@ def compare_models():
         raise ValueError(
             "Baseline and Temporal CNN dates do not match."
         )
+    if not baseline["date"].equals(transformer["date"]):
+        raise ValueError(
+            "Baseline and Transformer dates do not match."
+        )
     # -------------------------------------------------
     # Validate actual values
    
@@ -194,6 +209,9 @@ def compare_models():
         "actual"
     ].to_numpy(dtype=float)
     tcn_actual = tcn[
+        "actual"
+    ].to_numpy(dtype=float)
+    transformer_actual = transformer[
         "actual"
     ].to_numpy(dtype=float)
 
@@ -225,6 +243,13 @@ def compare_models():
     ):
         raise ValueError(
             "Baseline and Temporal CNN actual values do not match."
+        )
+    if not np.allclose(
+        baseline_actual,
+        transformer_actual
+    ):
+        raise ValueError(
+            "Baseline and Transformer actual values do not match."
         )
     print("\nValidation passed:")
     print(
@@ -264,6 +289,10 @@ def compare_models():
         tcn_actual,
         tcn["temporal_cnn_forecast"]
     )
+    transformer_metrics = calculate_metrics(
+        transformer_actual,
+        transformer["transformer_forecast"]
+    )
     # -------------------------------------------------
     # Comparison table
     # -------------------------------------------------
@@ -294,11 +323,17 @@ def compare_models():
                 "RMSE": rf_metrics[1],
                 "MAPE": rf_metrics[2]
             },
-            {
+                      {
                 "model": "Temporal CNN",
                 "MAE": tcn_metrics[0],
                 "RMSE": tcn_metrics[1],
                 "MAPE": tcn_metrics[2]
+            },
+            {
+                "model": "Transformer",
+                "MAE": transformer_metrics[0],
+                "RMSE": transformer_metrics[1],
+                "MAPE": transformer_metrics[2]
             }
         ]
     )

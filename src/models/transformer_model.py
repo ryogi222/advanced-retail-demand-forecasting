@@ -510,7 +510,40 @@ def train_transformer():
     print(
         comparison.head(10)
     )
+    # --------------------------------------------------
+    # Save standardized forecast
+    # --------------------------------------------------
 
+    forecast_output = pd.DataFrame({
+        "date": comparison["date"],
+        "actual": comparison["actual"],
+        "transformer_forecast": comparison["prediction"]
+    })
+
+    forecast_output["absolute_error"] = np.abs(
+        forecast_output["actual"]
+        - forecast_output["transformer_forecast"]
+    )
+
+    forecast_path = (
+        PROJECT_ROOT
+        / "data"
+        / "processed"
+        / "transformer_ca1_forecast.csv"
+    )
+
+    forecast_output.to_csv(
+        forecast_path,
+        index=False
+    )
+
+    print(
+        "\nForecast saved:"
+    )
+
+    print(
+        forecast_path
+    )
     # --------------------------------------------------
     # Save model
     # --------------------------------------------------

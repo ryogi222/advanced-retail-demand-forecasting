@@ -15,6 +15,7 @@ PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 BASELINE_FILE = PROCESSED_DIR / "hierarchical_forecasts.csv"
 GRU_FILE = PROCESSED_DIR / "gru_ca1_forecast.csv"
 LSTM_FILE = PROCESSED_DIR / "lstm_ca1_forecast.csv"
+RF_FILE = PROCESSED_DIR / "random_forest_ca1_forecast.csv"
 
 OUTPUT_FILE = PROCESSED_DIR / "model_comparison.csv"
 
@@ -90,6 +91,14 @@ def compare_models():
         LSTM_FILE,
         parse_dates=["date"]
     )
+    rf = pd.read_csv(
+        RF_FILE,
+        parse_dates=["date"]
+    )
+
+    rf = rf.sort_values(
+        "date"
+    ).reset_index(drop=True)
 
     # Keep only store-level CA_1 baseline
     baseline = baseline[
@@ -112,6 +121,7 @@ def compare_models():
     print(f"\nBaseline rows: {len(baseline)}")
     print(f"GRU rows:      {len(gru)}")
     print(f"LSTM rows:     {len(lstm)}")
+    print(f"Random Forest rows: {len(rf)}")
 
     # -------------------------------------------------
     # Validate lengths
@@ -123,6 +133,7 @@ def compare_models():
         len(baseline)
         == len(gru)
         == len(lstm)
+        == len(rf)
         == expected_rows
     ):
         raise ValueError(
@@ -143,6 +154,10 @@ def compare_models():
         raise ValueError(
             "Baseline and LSTM dates do not match."
         )
+    if not baseline["date"].equals(rf["date"]):
+        raise ValueError(
+            "Baseline and Random Forest dates do not match."
+        )
 
     # -------------------------------------------------
     # Validate actual values
@@ -157,6 +172,9 @@ def compare_models():
     ].to_numpy(dtype=float)
 
     lstm_actual = lstm[
+        "actual"
+    ].to_numpy(dtype=float)
+    rf_actual = rf[
         "actual"
     ].to_numpy(dtype=float)
 
@@ -175,7 +193,13 @@ def compare_models():
         raise ValueError(
             "Baseline and LSTM actual values do not match."
         )
-
+    if not np.allclose(
+        baseline_actual,
+        rf_actual
+    ):
+        raise ValueError(
+            "Baseline and Random Forest actual values do not match."
+        )
     print("\nValidation passed:")
     print(
         "All models use the same 28 test dates "
@@ -206,7 +230,10 @@ def compare_models():
         lstm_actual,
         lstm["lstm_forecast"]
     )
-
+    rf_metrics = calculate_metrics(
+        rf_actual,
+        rf["random_forest_forecast"]
+    )
     # -------------------------------------------------
     # Comparison table
     # -------------------------------------------------
@@ -225,11 +252,17 @@ def compare_models():
                 "RMSE": gru_metrics[1],
                 "MAPE": gru_metrics[2]
             },
-            {
+                        {
                 "model": "LSTM",
                 "MAE": lstm_metrics[0],
                 "RMSE": lstm_metrics[1],
                 "MAPE": lstm_metrics[2]
+            },
+            {
+                "model": "Random Forest",
+                "MAE": rf_metrics[0],
+                "RMSE": rf_metrics[1],
+                "MAPE": rf_metrics[2]
             }
         ]
     )

@@ -50,81 +50,81 @@ Seven forecasting approaches were evaluated:
 
 The **Quantile Random Forest P50 forecast achieved the best holdout MAPE of 5.07%**.
 
-!\[Model Comparison](reports/figures/model_comparison_mape.png)
+![Model Comparison](reports/figures/model_comparison_mape.png)
 
-\## Feature Engineering
+## Feature Engineering
 
 The forecasting pipeline uses time-series features designed to capture recent demand patterns, seasonality, calendar effects, and retail events.
 
-\### Lag Features
+### Lag Features
 
-\- Lag 1
+- Lag 1
 
-\- Lag 7
+- Lag 7
 
-\- Lag 14
+- Lag 14
 
-\- Lag 28
+- Lag 28
 
-\### Rolling Features
+### Rolling Features
 
-\- 7-day rolling mean
+- 7-day rolling mean
 
-\- 28-day rolling mean
+- 28-day rolling mean
 
-\- 7-day rolling standard deviation
+- 7-day rolling standard deviation
 
-\- 28-day rolling standard deviation
+- 28-day rolling standard deviation
 
 Rolling statistics are shifted so that the current day's target value is not included in its own features.
 
-\### Calendar and Event Features
+### Calendar and Event Features
 
 Additional features include:
 
-\- Day of week
+- Day of week
 
-\- Day of month
+- Day of month
 
-\- Month
+- Month
 
-\- Year
+- Year
 
-\- Week of year
+- Week of year
 
-\- Weekend indicator
+- Weekend indicator
 
-\- SNAP indicator
+- SNAP indicator
 
-\- Cultural events
+- Cultural events
 
-\- National events
+- National events
 
-\- Religious events
+- Religious events
 
-\- Sporting events
+- Sporting events
 
-\- Super Bowl
+- Super Bowl
 
-\- Valentine's Day
+- Valentine's Day
 
-\- Christmas
+- Christmas
 
-\## Probabilistic Forecasting
+## Probabilistic Forecasting
 
 Point forecasts provide a single estimate of future demand but do not communicate uncertainty.
 
 The project therefore uses predictions from the individual trees in the Random Forest ensemble to generate empirical prediction quantiles:
 
-\- \*\*P10\*\* - lower prediction bound
+- **P10** - lower prediction bound
 
-\- \*\*P50\*\* - median demand forecast
+- **P50** - median demand forecast
 
-\- \*\*P90\*\* - upper prediction bound
+- **P90** - upper prediction bound
 
 The P10-P90 interval represents a nominal 80% prediction interval.
 
-\### Final 28-Day Results
+### Final 28-Day Results
 
 | Metric | Result |
 
@@ -134,15 +134,15 @@ The P10-P90 interval represents a nominal 80% prediction interval.
 
 | P50 RMSE | 293.37 |
 
-| P50 MAPE | \*\*5.07%\*\* |
+| P50 MAPE | **5.07%** |
 
 | P10-P90 empirical coverage | 71.43% |
 
 | Average interval width | 700.31 units |
 
-!\[Probabilistic Demand Forecast](reports/figures/probabilistic_forecast.png)
+![Probabilistic Demand Forecast](reports/figures/probabilistic_forecast.png)
 
-\## Rolling-Origin Backtesting
+## Rolling-Origin Backtesting
 
 A single train/test split may not provide a reliable estimate of forecasting performance. To evaluate stability across time, the probabilistic Random Forest was tested using four historical 28-day evaluation windows.
 
@@ -158,25 +158,25 @@ A single train/test split may not provide a reliable estimate of forecasting per
 
 | 4 | 25 Apr - 22 May 2016 | 249.89 | 294.95 | 5.08% | 78.57% |
 
-Across all \*\*112 out-of-sample observations\*\*:
+Across all **112 out-of-sample observations**:
 
 | Metric | Result |
 
 |---|---:|
 
-| MAE | \*\*236.08\*\* |
+| MAE | **236.08** |
 
-| RMSE | \*\*303.42\*\* |
+| RMSE | **303.42** |
 
-| MAPE | \*\*5.05%\*\* |
+| MAPE | **5.05%** |
 
-| P10-P90 Coverage | \*\*84.82%\*\* |
+| P10-P90 Coverage | **84.82%** |
 
-!\[Random Forest Backtest](reports/figures/random_forest_backtest_mape.png)
+![Random Forest Backtest](reports/figures/random_forest_backtest_mape.png)
 
 The backtesting results demonstrate that the model maintains strong forecasting accuracy across multiple historical periods rather than relying on a single favourable holdout window.
 
-\## Hierarchical Forecasting
+## Hierarchical Forecasting
 
 Retail demand exists at multiple aggregation levels. This project constructs a forecasting hierarchy for the CA_1 store:
 
@@ -184,31 +184,31 @@ Store -> Category -> Department
 
 The hierarchy contains:
 
-\- 1 store-level series
+- 1 store-level series
 
-\- 3 category-level series
+- 3 category-level series
 
-\- 7 department-level series
+- 7 department-level series
 
-The three categories are \*\*FOODS\*\*, \*\*HOBBIES\*\*, and \*\*HOUSEHOLD\*\*.
+The three categories are **FOODS**, **HOBBIES**, and **HOUSEHOLD**.
 
 Forecast reconciliation validation confirms that category and department forecasts aggregate exactly to the CA_1 store forecast.
 
 This is important in retail because forecasts produced at different organisational levels should remain mathematically consistent.
 
-\## Evaluation Methodology
+## Evaluation Methodology
 
 All model evaluation uses chronological data splitting rather than random train/test splitting.
 
-The primary model comparison uses the final \*\*28 days\*\* as the holdout period.
+The primary model comparison uses the final **28 days** as the holdout period.
 
 Lag and rolling features use historical observations only, preventing the current day's target from entering its own predictors.
 
-The evaluation represents a \*\*rolling one-step-ahead forecasting setting\*\*. As the evaluation period progresses, previously observed sales become available for subsequent lag and rolling features.
+The evaluation represents a **rolling one-step-ahead forecasting setting**. As the evaluation period progresses, previously observed sales become available for subsequent lag and rolling features.
 
 Therefore, these results should not be interpreted as a fully recursive 28-day forecast generated entirely from information available before the start of the holdout period.
 
-\## Project Structure
+## Project Structure
 
 advanced-retail-demand-forecasting/
 
@@ -286,107 +286,107 @@ advanced-retail-demand-forecasting/
 
 +-- requirements.txt
 
-\## Technologies
+## Technologies
 
 The project uses:
 
-\- Python
+- Python
 
-\- Pandas
+- Pandas
 
-\- NumPy
+- NumPy
 
-\- Scikit-learn
+- Scikit-learn
 
-\- TensorFlow / Keras
+- TensorFlow / Keras
 
-\- PyTorch
+- PyTorch
 
-\- Matplotlib
+- Matplotlib
 
-\- Git
+- Git
 
-\- GitHub
+- GitHub
 
-\- PowerShell
+- PowerShell
 
-\- Python virtual environments
+- Python virtual environments
 
-\## Key Findings
+## Key Findings
 
 The main findings from the project are:
 
-\- Quantile Random Forest P50 achieved the best final holdout MAPE at \*\*5.07%\*\*.
+- Quantile Random Forest P50 achieved the best final holdout MAPE at **5.07%**.
 
-\- Standard Random Forest achieved \*\*5.45% MAPE\*\*.
+- Standard Random Forest achieved **5.45% MAPE**.
 
-\- Transformer achieved \*\*5.48% MAPE\*\*.
+- Transformer achieved **5.48% MAPE**.
 
-\- GRU achieved \*\*7.11% MAPE\*\*.
+- GRU achieved **7.11% MAPE**.
 
-\- Rolling-origin backtesting produced an overall \*\*5.05% MAPE across 112 out-of-sample observations\*\*.
+- Rolling-origin backtesting produced an overall **5.05% MAPE across 112 out-of-sample observations**.
 
-\- P10-P90 intervals achieved \*\*84.82% empirical coverage across the four-fold backtest\*\*.
+- P10-P90 intervals achieved **84.82% empirical coverage across the four-fold backtest**.
 
-\- Hierarchical reconciliation produced coherent forecasts across store, category, and department levels.
+- Hierarchical reconciliation produced coherent forecasts across store, category, and department levels.
 
-\- Tree-based models were highly competitive with the deep-learning architectures on this structured retail forecasting problem.
+- Tree-based models were highly competitive with the deep-learning architectures on this structured retail forecasting problem.
 
-\## Business Value
+## Business Value
 
 Accurate retail demand forecasts can support:
 
-\- Inventory replenishment
+- Inventory replenishment
 
-\- Product availability
+- Product availability
 
-\- Safety-stock planning
+- Safety-stock planning
 
-\- Supply-chain planning
+- Supply-chain planning
 
-\- Promotion planning
+- Promotion planning
 
-\- Workforce planning
+- Workforce planning
 
-\- Warehouse capacity planning
+- Warehouse capacity planning
 
-\- Waste reduction
+- Waste reduction
 
 Probabilistic forecasting adds additional business value by quantifying uncertainty.
 
 For example, the P50 forecast can represent expected demand, while higher quantiles such as P90 can support more conservative inventory decisions when the cost of stockouts is high.
 
-\## Future Improvements
+## Future Improvements
 
 Future development could include:
 
-\- Fully recursive multi-step forecasting
+- Fully recursive multi-step forecasting
 
-\- XGBoost and LightGBM
+- XGBoost and LightGBM
 
-\- Automated hyperparameter optimisation
+- Automated hyperparameter optimisation
 
-\- Conformal prediction intervals
+- Conformal prediction intervals
 
-\- Prediction interval calibration
+- Prediction interval calibration
 
-\- Temporal Fusion Transformer
+- Temporal Fusion Transformer
 
-\- N-BEATS
+- N-BEATS
 
-\- Product-level probabilistic forecasting
+- Product-level probabilistic forecasting
 
-\- MinT hierarchical forecast reconciliation
+- MinT hierarchical forecast reconciliation
 
-\- Automated model monitoring
+- Automated model monitoring
 
-\- Streamlit forecasting dashboard
+- Streamlit forecasting dashboard
 
-\- Cloud deployment
+- Cloud deployment
 
-\## Author
+## Author
 
-\*\*Yogeshwaran Doresamy\*\*
+**Yogeshwaran Doresamy**
 
 MSc Data Science
 

@@ -1,5 +1,17 @@
 # Advanced Retail Demand Forecasting
 
+## 🚀 Live Demo
+
+Explore the interactive forecasting dashboard:
+
+**[Launch the Streamlit Dashboard](https://advanced-retail-demand-forecasting-3dxseifxt5jxayowuc7j3.streamlit.app/)**
+
+The dashboard includes:
+- Model comparison across 7 forecasting approaches
+- Probabilistic demand forecasting with P10, P50 and P90 estimates
+- Rolling-origin backtesting
+- Hierarchical forecasting across store, category and department levels
+
 An end-to-end machine learning and deep learning project for retail demand forecasting using the **M5 Forecasting Accuracy dataset**.
 
 The project compares statistical baselines, machine learning, deep learning, hierarchical forecasting, and probabilistic forecasting using chronological evaluation and rolling-origin backtesting.

@@ -3,7 +3,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_squared_error
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -186,6 +189,12 @@ def quantile_random_forest():
         y_test,
         p50
     )
+    rmse = np.sqrt(
+        mean_squared_error(
+            y_test,
+            p50
+        )
+    )
 
     mape = calculate_mape(
         y_test,
@@ -195,7 +204,9 @@ def quantile_random_forest():
     print(
         f"\nP50 MAE:  {mae:.2f}"
     )
-
+    print(
+        f"P50 RMSE: {rmse:.2f}"
+    )
     print(
         f"P50 MAPE: {mape:.2f}%"
     )

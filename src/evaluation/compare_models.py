@@ -18,6 +18,11 @@ TRANSFORMER_FILE = PROCESSED_DIR / "transformer_ca1_forecast.csv"
 GRU_FILE = PROCESSED_DIR / "gru_ca1_forecast.csv"
 LSTM_FILE = PROCESSED_DIR / "lstm_ca1_forecast.csv"
 RF_FILE = PROCESSED_DIR / "random_forest_ca1_forecast.csv"
+QUANTILE_RF_FILE = (
+    PROJECT_ROOT
+    / "reports"
+    / "quantile_random_forest_forecast.csv"
+)
 
 OUTPUT_FILE = PROCESSED_DIR / "model_comparison.csv"
 
@@ -117,6 +122,16 @@ def compare_models():
     transformer = transformer.sort_values(
         "date"
     ).reset_index(drop=True)
+
+    quantile_rf = pd.read_csv(
+        QUANTILE_RF_FILE,
+        parse_dates=["date"]
+    )
+
+    quantile_rf = quantile_rf.sort_values(
+        "date"
+    ).reset_index(drop=True)
+
     # Keep only store-level CA_1 baseline
     baseline = baseline[
         (baseline["level"] == "store")
@@ -141,6 +156,7 @@ def compare_models():
     print(f"Random Forest rows: {len(rf)}")
     print(f"Temporal CNN rows: {len(tcn)}")
     print(f"Transformer rows: {len(transformer)}")
+    print(f"Quantile RF rows: {len(quantile_rf)}")
 
     # -------------------------------------------------
     # Validate lengths
@@ -155,6 +171,7 @@ def compare_models():
         == len(rf)
         == len(tcn)
         == len(transformer)
+        == len(quantile_rf)
         == expected_rows
     ):
         raise ValueError(
@@ -166,6 +183,11 @@ def compare_models():
     # Validate dates
     # -------------------------------------------------
 
+    if not baseline["date"].equals(quantile_rf["date"]):
+        raise ValueError(
+            "Baseline and Quantile Random Forest dates do not match."
+        )
+
     if not baseline["date"].equals(gru["date"]):
         raise ValueError(
             "Baseline and GRU dates do not match."
@@ -175,10 +197,7 @@ def compare_models():
         raise ValueError(
             "Baseline and LSTM dates do not match."
         )
-    if not baseline["date"].equals(rf["date"]):
-        raise ValueError(
-            "Baseline and Random Forest dates do not match."
-        )
+   
     if not baseline["date"].equals(tcn["date"]):
         raise ValueError(
             "Baseline and Temporal CNN dates do not match."
@@ -214,6 +233,18 @@ def compare_models():
     transformer_actual = transformer[
         "actual"
     ].to_numpy(dtype=float)
+
+    quantile_rf_actual = quantile_rf[
+        "actual"
+    ].to_numpy(dtype=float)
+
+    if not np.allclose(
+        baseline_actual,
+        quantile_rf_actual
+    ):
+        raise ValueError(
+            "Baseline and Quantile Random Forest actual values do not match."
+        )
 
     if not np.allclose(
         baseline_actual,
@@ -293,6 +324,10 @@ def compare_models():
         transformer_actual,
         transformer["transformer_forecast"]
     )
+    quantile_rf_metrics = calculate_metrics(
+    quantile_rf_actual,
+    quantile_rf["p50"]
+    )
     # -------------------------------------------------
     # Comparison table
     # -------------------------------------------------
@@ -334,7 +369,13 @@ def compare_models():
                 "MAE": transformer_metrics[0],
                 "RMSE": transformer_metrics[1],
                 "MAPE": transformer_metrics[2]
-            }
+            },
+            {
+               "model": "Quantile Random Forest (P50)",
+               "MAE": quantile_rf_metrics[0],
+               "RMSE": quantile_rf_metrics[1],
+               "MAPE": quantile_rf_metrics[2]
+           }
         ]
     )
 

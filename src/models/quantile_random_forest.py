@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
@@ -326,6 +327,36 @@ def quantile_random_forest():
     # -----------------------------------
     # Save
     # -----------------------------------
+
+    # -----------------------------------
+    # Save trained model
+    # -----------------------------------
+
+    models_dir = (
+        PROJECT_ROOT
+        / "models"
+    )
+
+    models_dir.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    model_path = (
+        models_dir
+        / "quantile_random_forest.joblib"
+    )
+
+    joblib.dump(
+        model,
+        model_path
+    )
+
+    print(
+        "\nModel saved:"
+    )
+
+    print(model_path)
 
     reports_dir = (
         PROJECT_ROOT

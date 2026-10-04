@@ -399,27 +399,46 @@ def train_temporal_cnn():
     # ---------------------------------
 
     comparison = pd.DataFrame({
-
-        "date":
+        "date": (
             df["date"]
             .iloc[train_size:]
-            .values,
-
-        "actual":
-            actual,
-
-        "prediction":
-            predictions
+            .values
+        ),
+        "actual": actual,
+        "temporal_cnn_forecast": predictions
     })
+
+    comparison["absolute_error"] = np.abs(
+        comparison["actual"]
+        - comparison["temporal_cnn_forecast"]
+    )
+
+    output_path = (
+        PROJECT_ROOT
+        / "data"
+        / "processed"
+        / "temporal_cnn_ca1_forecast.csv"
+    )
+
+    comparison.to_csv(
+        output_path,
+        index=False
+    )
 
     print(
         "\n--- SAMPLE FORECASTS ---"
     )
 
     print(
-        comparison.head(10)
+        comparison.head(10).to_string(
+            index=False
+        )
     )
 
+    print(
+        "\nForecast saved:"
+    )
+    print(output_path)
     # ---------------------------------
     # Save model
     # ---------------------------------
@@ -446,4 +465,4 @@ def train_temporal_cnn():
 
 if __name__ == "__main__":
 
-    train_temporal_cnn()
+    train_temporal_cnn() 

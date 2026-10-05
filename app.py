@@ -439,6 +439,7 @@ def show_live_prediction():
         "The model returns P10, P50 and P90 demand estimates "
         "to represent forecast uncertainty."
     )
+
     feature_path = (
         PROJECT_ROOT
         / "data"
@@ -446,18 +447,30 @@ def show_live_prediction():
         / "ca_1_daily_features_calendar.csv"
     )
 
+    feature_data = pd.read_csv(feature_path)
+
+    feature_data["date"] = pd.to_datetime(
+        feature_data["date"]
+    )
+
+    selected_date = st.selectbox(
+        "Select forecast date",
+        options=feature_data["date"].dt.date.tolist(),
+        index=len(feature_data) - 1,
+    )
+
     if st.button("Generate Prediction"):
 
         try:
             model = get_prediction_model()
 
-            feature_data = pd.read_csv(feature_path)
-
-            latest_row = feature_data.tail(1)
+            selected_row = feature_data[
+                feature_data["date"].dt.date == selected_date
+            ]
 
             prediction = predict_quantiles(
                 model,
-                latest_row
+                selected_row
             )
 
             p10 = float(prediction["p10"][0])

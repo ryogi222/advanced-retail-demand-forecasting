@@ -3,6 +3,10 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 from src.inference.predict import load_model, predict_quantiles
+from src.inference.future_features import (
+    build_next_day_features,
+    add_calendar_features,
+)
 
 # --------------------------------------------------
 # Page configuration
@@ -491,6 +495,80 @@ def show_live_prediction():
             st.error(
                 f"Prediction failed: {error}"
             )
+
+    st.divider()
+
+    st.subheader("Next-Day Forecast")
+
+    st.write(
+        "Generate a genuine next-day forecast using only "
+        "historical demand and calendar information."
+    )
+
+    if st.button("Generate Next-Day Forecast"):
+
+        try:
+            model = get_prediction_model()
+
+            history = pd.read_csv(
+                PROJECT_ROOT
+                / "data"
+                / "processed"
+                / "ca_1_daily_features_calendar.csv"
+            )
+
+            calendar = pd.read_csv(
+                PROJECT_ROOT
+                / "data"
+                / "raw"
+                / "m5"
+                / "calendar.csv"
+            )
+
+            future_features = build_next_day_features(
+                history[["date", "sales"]]
+            )
+
+            future_features = add_calendar_features(
+                future_features,
+                calendar
+            )
+
+            future_row = pd.DataFrame(
+                [future_features]
+            )
+
+            prediction = predict_quantiles(
+                model,
+                future_row
+            )
+
+            p10 = float(prediction["p10"][0])
+            p50 = float(prediction["p50"][0])
+            p90 = float(prediction["p90"][0])
+            mean = float(prediction["mean"][0])
+
+            forecast_date = pd.to_datetime(
+                future_features["date"]
+            ).date()
+
+            st.success(
+                f"Next-day forecast generated for {forecast_date}"
+            )
+
+            col1, col2, col3, col4 = st.columns(4)
+
+            col1.metric("P10", f"{p10:,.0f}")
+            col2.metric("P50", f"{p50:,.0f}")
+            col3.metric("P90", f"{p90:,.0f}")
+            col4.metric("Mean", f"{mean:,.0f}")
+
+        except Exception as error:
+            st.error(
+                f"Future forecast failed: {error}"
+            )
+
+
 # --------------------------------------------------
 # Page router
 # --------------------------------------------------

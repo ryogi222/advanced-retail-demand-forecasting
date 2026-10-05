@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-
+from src.inference.predict import load_model, predict_quantiles
 
 # --------------------------------------------------
 # Page configuration
@@ -38,9 +38,9 @@ page = st.sidebar.radio(
         "Probabilistic Forecast",
         "Backtesting",
         "Hierarchical Forecasting",
+        "Live Prediction",
     ],
 )
-
 st.sidebar.divider()
 
 st.sidebar.markdown(
@@ -416,7 +416,68 @@ def show_hierarchical_forecasting():
             hide_index=True,
         )
 
+# --------------------------------------------------
+# Live Prediction page
+# --------------------------------------------------
+ 
+@st.cache_resource
+def get_prediction_model():
+    return load_model()
 
+def show_live_prediction():
+
+    show_header()
+
+    st.subheader("Live Demand Prediction")
+
+    st.write(
+        "Generate probabilistic demand forecasts using the "
+        "trained Quantile Random Forest model."
+    )
+
+    st.info(
+        "The model returns P10, P50 and P90 demand estimates "
+        "to represent forecast uncertainty."
+    )
+    feature_path = (
+        PROJECT_ROOT
+        / "data"
+        / "processed"
+        / "ca_1_daily_features_calendar.csv"
+    )
+
+    if st.button("Generate Prediction"):
+
+        try:
+            model = get_prediction_model()
+
+            feature_data = pd.read_csv(feature_path)
+
+            latest_row = feature_data.tail(1)
+
+            prediction = predict_quantiles(
+                model,
+                latest_row
+            )
+
+            p10 = float(prediction["p10"][0])
+            p50 = float(prediction["p50"][0])
+            p90 = float(prediction["p90"][0])
+            mean = float(prediction["mean"][0])
+
+            st.success("Prediction generated successfully.")
+
+            col1, col2, col3, col4 = st.columns(4)
+
+            col1.metric("P10", f"{p10:,.0f}")
+            col2.metric("P50", f"{p50:,.0f}")
+            col3.metric("P90", f"{p90:,.0f}")
+            col4.metric("Mean", f"{mean:,.0f}")
+
+        except Exception as error:
+            st.error(
+                f"Prediction failed: {error}"
+            )
 # --------------------------------------------------
 # Page router
 # --------------------------------------------------
@@ -435,3 +496,6 @@ elif page == "Backtesting":
 
 elif page == "Hierarchical Forecasting":
     show_hierarchical_forecasting()
+
+elif page == "Live Prediction":
+    show_live_prediction()

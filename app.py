@@ -7,6 +7,7 @@ from src.inference.future_features import (
     build_next_day_features,
     add_calendar_features,
 )
+from src.inference.multi_day_forecast import forecast_multiple_days
 
 # --------------------------------------------------
 # Page configuration
@@ -564,6 +565,81 @@ def show_live_prediction():
         except Exception as error:
             st.error(
                 f"Future forecast failed: {error}"
+            )
+
+
+    st.divider()
+
+    st.subheader("7-Day Future Forecast")
+
+    st.write(
+        "Generate a recursive 7-day demand forecast. "
+        "Each day's P50 prediction is used to construct the demand features "
+        "for the following day."
+    )
+
+    if st.button("Generate 7-Day Forecast"):
+
+        try:
+            model = get_prediction_model()
+
+            history = pd.read_csv(
+                PROJECT_ROOT
+                / "data"
+                / "processed"
+                / "ca_1_daily_features_calendar.csv"
+            )
+
+            calendar = pd.read_csv(
+                PROJECT_ROOT
+                / "data"
+                / "raw"
+                / "m5"
+                / "calendar.csv"
+            )
+
+            forecasts = forecast_multiple_days(
+                model=model,
+                history=history,
+                calendar=calendar,
+                days=7,
+            )
+
+            display_forecasts = forecasts.copy()
+
+            display_forecasts["date"] = (
+                pd.to_datetime(display_forecasts["date"])
+                .dt.strftime("%Y-%m-%d")
+            )
+
+            for column in ["p10", "p50", "p90", "mean"]:
+                display_forecasts[column] = (
+                    display_forecasts[column].round(0)
+                )
+
+            display_forecasts = display_forecasts.rename(
+                columns={
+                    "date": "Date",
+                    "p10": "P10",
+                    "p50": "P50",
+                    "p90": "P90",
+                    "mean": "Mean",
+                }
+            )
+
+            st.success(
+                "7-day recursive forecast generated successfully."
+            )
+
+            st.dataframe(
+                display_forecasts,
+                use_container_width=True,
+                hide_index=True,
+            )
+
+        except Exception as error:
+            st.error(
+                f"7-day forecast failed: {error}"
             )
 
 

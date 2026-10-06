@@ -432,11 +432,10 @@ def show_live_prediction():
 
     show_header()
 
-    st.subheader("Live Demand Prediction")
+    st.subheader("Historical Demand Prediction")
 
     st.write(
-        "Generate probabilistic demand forecasts using the "
-        "trained Quantile Random Forest model."
+        "Select a historical date to inspect the model prediction against known demand features."
     )
 
     st.info(
@@ -501,10 +500,9 @@ def show_live_prediction():
     st.subheader("Next-Day Forecast")
 
     st.write(
-        "Generate a genuine next-day forecast using only "
-        "historical demand and calendar information."
+        "Forecast the first unseen day after the latest available historical data. "
+        "This forecast does not depend on the historical date selected above."
     )
-
     if st.button("Generate Next-Day Forecast"):
 
         try:

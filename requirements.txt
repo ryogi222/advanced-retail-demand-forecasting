@@ -5,3 +5,5 @@ matplotlib
 scikit-learn
 joblib
 pytest
+fastapi
+uvicorn[standard]

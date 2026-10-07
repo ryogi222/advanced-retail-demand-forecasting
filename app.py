@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import matplotlib.pyplot as plt
 from src.inference.predict import load_model, predict_quantiles
 from src.inference.future_features import (
     build_next_day_features,
@@ -636,7 +637,36 @@ def show_live_prediction():
                 use_container_width=True,
                 hide_index=True,
             )
+            st.subheader("7-Day Forecast with Uncertainty")
 
+            fig, ax = plt.subplots(figsize=(10, 5))
+
+            ax.plot(
+                forecasts["date"],
+                forecasts["p50"],
+                marker="o",
+                label="P50 Forecast",
+            )
+
+            ax.fill_between(
+                forecasts["date"],
+                forecasts["p10"],
+                forecasts["p90"],
+                alpha=0.2,
+                label="P10–P90 Interval",
+            )
+
+            ax.set_title("7-Day Retail Demand Forecast")
+            ax.set_xlabel("Forecast Date")
+            ax.set_ylabel("Demand (Units)")
+            ax.legend()
+            ax.grid(alpha=0.3)
+
+            fig.autofmt_xdate()
+
+            st.pyplot(fig)
+
+            plt.close(fig)
         except Exception as error:
             st.error(
                 f"7-day forecast failed: {error}"
